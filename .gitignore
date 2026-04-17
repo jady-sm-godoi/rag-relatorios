@@ -12,6 +12,7 @@ venv/
 tmp/
 
 docs/*
+audios/*
 relatorios_exportados/*
 uv.lock
 .vscode/*

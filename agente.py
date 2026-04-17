@@ -8,8 +8,12 @@ from agno.knowledge.knowledge import Knowledge
 from agno.knowledge.reader.pdf_reader import PDFReader
 from agno.knowledge.reader.text_reader import TextReader
 from agno.models.openai import OpenAIChat
+from agno.tools import tool
 from agno.vectordb.lancedb import LanceDb
 from dotenv import load_dotenv
+
+from audio2text import run_transcription
+from instructions import agent_instructions
 
 load_dotenv()
 
@@ -58,6 +62,16 @@ if any(any(DOCS_DIR.glob(ext)) for ext in text_extensions):
 # Banco de dados de histórico
 db = SqliteDb(db_file="tmp/historico_agente.db")
 
+
+@tool
+def transcribe_audios(audio_folder: str = "audios", title: str = "") -> dict:
+    """
+    Transcribe all audio files inside the 'audios' folder
+    and return the transcriptions
+    """
+    return run_transcription(audio_folder=audio_folder, title=title)
+
+
 # 3. Agente Especialista
 tech_writer_agent = Agent(
     name="Documentador de Soluções",
@@ -65,26 +79,9 @@ tech_writer_agent = Agent(
     knowledge=knowledge_base,
     db=db,
     search_knowledge=True,
-    # add_knowledge_to_context=True,
-    instructions=[
-        "Você é um Arquiteto de Software e Tech Lead experiente, especializado em análise de código e documentação técnica estruturada.",
-        "Sua principal responsabilidade é reconstruir e documentar a solução implementada em uma Prova de Conceito (POC), com base em histórico de commits e documentos de estudo.",
-        "Você deve correlacionar informações entre diferentes fontes (ex: commits e etapas do estudo), identificando relações entre intenção (decisão técnica) e implementação (código).",
-        "Não apenas descreva o que foi feito — explique o porquê das decisões técnicas e seus impactos arquiteturais.",
-        "Identifique padrões de projeto e estratégias adotadas",
-        "Agrupe mudanças relacionadas em etapas lógicas, mesmo que estejam distribuídas em múltiplos commits.",
-        "Ao analisar código, destaque apenas trechos relevantes para entendimento da solução, evitando excesso de verbosidade.",
-        "Use blocos de código Markdown sempre que necessário, indicando claramente arquivo e contexto (Ex: # arquivo.py - linha 10).",
-        "Destaque explicitamente:",
-        "- TODOs encontrados no código",
-        "- Decisões de design (explícitas ou implícitas)",
-        "- Pontos de atenção ou possíveis melhorias",
-        "Se houver inconsistências entre commits e documentação, aponte e explique possíveis causas.",
-        "Se informações não estiverem explícitas, faça inferências técnicas justificadas com base no contexto.",
-        "Sua saída deve seguir rigorosamente uma estrutura de relatório técnico, com clareza, rastreabilidade e profundidade.",
-        "Evite descrições genéricas. Seja específico, técnico e objetivo.",
-    ],
+    instructions=agent_instructions,
     markdown=True,
+    tools=[transcribe_audios],
 )
 
 # --- 4. LEITURA DO PROMPT DE ARQUIVO EXTERNO ---
