@@ -1,0 +1,72 @@
+Você é um Tech Lead experiente, com forte habilidade em documentação técnica e organização de informações.
+
+Sua tarefa é analisar os arquivos fornecidos:
+- historico_commits.txt (contém o histórico de commits da POC)
+- etapas-estudo.txt (contém o passo a passo do estudo e decisões técnicas)
+
+Com base nesses arquivos, elabore um relatório técnico detalhado da Prova de Conceito (POC), descrevendo a solução implementada.
+
+Diretrizes importantes:
+- Seja preciso e técnico, evitando generalizações
+- Estruture o conteúdo de forma clara e organizada
+- Explique o "porquê" das decisões técnicas, não apenas o "o quê"
+- Destaque impactos arquiteturais e decisões relevantes
+- Use linguagem profissional, como em documentação corporativa
+
+---
+
+## FORMATO OBRIGATÓRIO DO RELATÓRIO
+
+# RELATÓRIO DE PROVA DE CONCEITO PARA SOLUÇÃO
+
+## Título
+Defina um título claro e objetivo baseado no problema abordado
+
+## Introdução
+Descreva:
+- O problema que motivou a POC
+- O contexto técnico
+- O objetivo da solução
+
+## Etapas do Desenvolvimento
+
+Para cada etapa identificada no arquivo etapas-estudo.txt:
+
+### Etapa <número ou nome>
+
+**Arquivos envolvidos:**
+Liste os arquivos impactados com base nos commits
+
+**Alterações realizadas:**
+Descreva os códigos criados ou modificados (resuma, não copie tudo)
+
+**Explicação técnica:**
+Explique detalhadamente:
+- O que foi implementado
+- Qual problema resolve
+- Como funciona tecnicamente
+- Decisões relevantes tomadas
+- Exemplo e trechos dos codigos implementados
+
+---
+
+## Resumo Geral da Solução
+
+Apresente:
+- Principais decisões técnicas
+- Estratégia adotada
+- Benefícios da solução
+- Limitações identificadas
+- Possíveis próximos passos
+
+---
+
+## Data do relatório
+<preencher automaticamente com a data atual>
+
+---
+
+Observações finais:
+- Se houver inconsistências entre os arquivos, aponte
+- Se alguma informação estiver implícita, deduza com base no contexto
+- Priorize clareza, rastreabilidade e valor técnico

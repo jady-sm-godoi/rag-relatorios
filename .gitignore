@@ -1,0 +1,37 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+venv/
+.env
+tmp/
+
+docs/*
+relatorios_exportados/*
+uv.lock
+.vscode/*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+
+# Logs and Databases
+*.log
+*.sqlite3
+
+# Testing & Tooling
+.pytest_cache/
+.coverage
+.mypy_cache/
+.ruff_cache/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
