@@ -1,6 +1,6 @@
 import math
 import os
-import shutil
+import tempfile
 from datetime import datetime
 from pathlib import Path
 from pprint import pprint
@@ -14,18 +14,17 @@ class Audio2Text:
         self.input_path = input_path
         self.audio_name = str(input_path).split("/")[-1].split(".")[0]
         self.chunk_length_ms = 30_000
-        self.chunk_paths = self.split_audio()
+        self.chunk_paths = []
         self.full_text = ""
 
-    def split_audio(self):
+    def split_audio(self, output_folder):
         audio = AudioSegment.from_file(self.input_path)
         total_length = len(audio)
 
-        output_folder = f"audios/chunks/{self.audio_name}"
         os.makedirs(output_folder, exist_ok=True)
 
         num_chunks = math.ceil(total_length / self.chunk_length_ms)
-        chunk_paths = []
+        self.chunk_paths = []
 
         for i in range(num_chunks):
             start = i * self.chunk_length_ms
@@ -33,9 +32,7 @@ class Audio2Text:
             chunk = audio[start:end]
             chunk_path = os.path.join(output_folder, f"chunk_{i:03d}.wav")
             chunk.export(chunk_path, format="wav")
-            chunk_paths.append(chunk_path)
-
-        return chunk_paths
+            self.chunk_paths.append(chunk_path)
 
     def transcribe(self):
         recognizer = sr.Recognizer()
@@ -63,39 +60,22 @@ class Audio2Text:
             f.write(f"{self.full_text}\n\n")
 
 
-# def get_unique_filename(filepath: str) -> Path:
-#     """
-#     Returns a unique path.
-#     If the file already exists, it adds numbering (_1, _2, etc.).
-#     """
-#     path = Path(filepath)
-#     parent = path.parent
-#     stem = path.stem
-#     suffix = path.suffix
-
-#     if not path.exists():
-#         return path
-
-#     counter = 1
-#     while True:
-#         new_name = f"{stem}_{counter}{suffix}"
-#         new_path = parent / new_name
-
-#         if not new_path.exists():
-#             return new_path
-
-#         counter += 1
-
-
 def run_transcription(audio_folder="audios", title=None) -> dict:
     """
-    Transcribe all audio files inside the 'audios' folder
-    and return the transcriptions
+    Transcreve todos os arquivos de áudio dentro da pasta 'audios'
+    e retorna as transcrições consolidadas.
     """
+    audio_dir = Path(audio_folder)
+    if not audio_dir.exists() or not audio_dir.is_dir():
+        return {
+            "file": "",
+            "content": f"A pasta de áudio '{audio_folder}' não foi encontrada.",
+        }
+
     mom_title = (
         f"{title}.txt"
         if title
-        else f"{datetime.isoformat(datetime.now())}.txt"
+        else f"transcricao_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
     )
     text_file_path = Path(f"docs/{mom_title}")
 
@@ -107,25 +87,28 @@ def run_transcription(audio_folder="audios", title=None) -> dict:
 
         return {"file": str(text_file_path), "content": " | ".join(parts)}
 
+    audio_files = [f for f in audio_dir.iterdir() if f.is_file()]
+    if not audio_files:
+        return {
+            "file": "",
+            "content": "Nenhum arquivo de áudio para transcrever na pasta.",
+        }
+
     text_file_path.parent.mkdir(parents=True, exist_ok=True)
     text_file_path.touch(exist_ok=True)
 
-    audio_files = [
-        file
-        for file in os.listdir(audio_folder)
-        if os.path.isfile(os.path.join(audio_folder, file))
-    ]
-
     parts = []
 
-    for file in audio_files:
-        text = Audio2Text(f"{audio_folder}/{file}")
-        transcription = text.transcribe()
-        text.write_to_file(str(text_file_path))
-        parts.append(transcription.strip())
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_path = Path(temp_dir)
+        for file in audio_files:
+            text = Audio2Text(file)
+            chunks_dir = temp_path / text.audio_name
+            text.split_audio(chunks_dir)
 
-    if os.path.exists("audios/chunks"):
-        shutil.rmtree("audios/chunks")
+            transcription = text.transcribe()
+            text.write_to_file(str(text_file_path))
+            parts.append(transcription.strip())
 
     return {"file": str(text_file_path), "content": " | ".join(parts)}
 
