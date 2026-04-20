@@ -10,7 +10,7 @@ O fluxo de trabalho do projeto é orquestrado em algumas etapas principais:
 
 1.  **Coleta de Dados**: O usuário popula as pastas `docs/` com arquivos de texto, código e PDFs, e a pasta `audios/` com arquivos de áudio que contêm informações relevantes (ex: gravações de reuniões de planejamento).
 
-2.  **Transcrição de Áudio (Ferramenta)**: Ao ser executado, o agente primeiro verifica a pasta `audios/`. Se encontrar arquivos, ele utiliza a ferramenta `transcribe_audios` (implementada em `audio2text.py`) para transcrevê-los para texto. O resultado é salvo em um arquivo `.txt` dentro da pasta `docs/`, tornando-se parte da base de conhecimento.
+2.  **Transcrição de Áudio (Ferramenta)**: Ao ser executado, o agente chama a ferramenta `transcribe_audios` (implementada em `audio2text.py`), que verifica a existência e o conteúdo da pasta de áudios de forma segura. Se encontrar arquivos, eles são processados usando diretórios temporários e transcritos. O resultado consolidado é salvo em um arquivo `.txt` dentro da pasta `docs/`, tornando-se parte da base de conhecimento.
 
 3.  **Criação da Base de Conhecimento (RAG)**: O script `agente.py` lê todos os arquivos da pasta `docs/`. Ele utiliza uma estratégia de `SemanticChunking` para dividir os documentos em pedaços com coesão semântica, converte esses pedaços em vetores (embeddings) e os armazena em um banco de dados vetorial (`LanceDB`).
 
@@ -101,7 +101,7 @@ rag-relatorios/
 ## Componentes Chave
 
 -   **`agente.py`**: O coração do projeto. Ele configura a base de conhecimento, inicializa o agente e gerencia o fluxo de execução.
--   **`audio2text.py`**: Expõe a funcionalidade de transcrição como uma `tool` para o agente. Ele lida com a divisão de áudios longos em partes menores (`chunks`) para contornar limitações de APIs de reconhecimento de fala.
+-   **`audio2text.py`**: Expõe a funcionalidade de transcrição como uma `tool` para o agente. Ele lida com a divisão de áudios longos em partes menores (`chunks`) utilizando **diretórios temporários (auto-limpantes)** para contornar limitações de APIs de reconhecimento de fala, garantindo processamento seguro sem deixar arquivos residuais no sistema, além de possuir validação robusta para evitar falhas caso a pasta de entrada não exista.
 -   **`instructions.py`**: Define a "personalidade" e as diretrizes de alto nível do agente. É crucial para garantir que o resultado seja técnico, preciso e bem estruturado.
 -   **`prompt_relatorio.txt`**: Funciona como a "tarefa do usuário". É um prompt flexível que pode ser facilmente modificado sem alterar o código Python, permitindo adaptar o objetivo do relatório para diferentes contextos.
 
